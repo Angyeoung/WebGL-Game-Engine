@@ -1,5 +1,5 @@
 
-class Vector3 {
+export class Vector3 {
 
     x: number;
     y: number;
@@ -21,7 +21,7 @@ class Vector3 {
         );
     }
 
-    subtract(vector: Vector3): Vector3 {
+    sub(vector: Vector3): Vector3 {
         return new Vector3(
             this.x - vector.x,
             this.y - vector.y,
@@ -29,7 +29,7 @@ class Vector3 {
         );
     }
 
-    multiply(n: number): Vector3 {
+    mul(n: number): Vector3 {
         return new Vector3(
             this.x * n,
             this.y * n,
@@ -37,12 +37,19 @@ class Vector3 {
         );
     }
 
-    divide(n: number): Vector3 {
-        return new Vector3(
-            this.x * n,
-            this.y * n,
-            this.z * n
-        );
+}
+
+export class Matrix4 {
+
+    
+
+}
+
+export class Random {
+
+    /** Returns a value `v` where `min >= v < max` */
+    static value(min: number, max: number): number {
+        return Math.random() * (max - min) + min; 
     }
 
 }

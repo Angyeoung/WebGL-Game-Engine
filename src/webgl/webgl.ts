@@ -1,4 +1,6 @@
-import { Color } from "./utils.ts";
+import type { UniformData, ProgramUniforms } from "./webgl.d.ts";
+import { getSetter } from "./uniforms.ts";
+import { Color } from "../utils.ts";
 
 
 /** Helper functions for renderers */
@@ -156,61 +158,21 @@ export class WebGL {
 
     setUniforms(uniformData: UniformData, programUniforms: ProgramUniforms): void {
         
-        for (const name in uniformData) {
-            
+        for (const [name, data] of Object.entries(uniformData)) {
             if (!programUniforms[name]) continue;
             const location = programUniforms[name].location;
-            // todo
-            switch (programUniforms[name].type) {
-                
-                case UniformTypes.mat4:
-                    this.gl.uniformMatrix4fv(location, false, uniformData[name]);
-                    break;
-
-                case UniformTypes.vec3:
-                    this.gl.uniform3fv(location, uniformData[name]);
-                    break;
-
-                case UniformTypes.vec4:
-                    this.gl.uniform4fv(location, uniformData[name]);
-                    break;
-
-                default:
-                    console.error("Setting unsupported uniform type");
-            
-            }
-
+            const setter = getSetter(programUniforms[name].type);
+            if (!setter) continue;
+            setter(this.gl, location, data);
         }
 
     }
 
 
-
-    getUniformSetter() {
-
-    }
-
 }
 
 
-/** Collection of data about the uniforms in a given program */
-type ProgramUniforms = Record<UniformName, UniformInfo>;
-/** Name of a uniform within a program */
-type UniformName = string;
-/** Info about a uniform */
-type UniformInfo = {
-    location: WebGLUniformLocation,
-    size: number,
-    type: number
-}
-/** Data used to update uniforms */
-type UniformData = Record<UniformName, Float32List>;
 
-enum UniformTypes {
-    mat4 = 35676,
-    vec3 = 35665,
-    vec4 = 35666
-}
 
 
 

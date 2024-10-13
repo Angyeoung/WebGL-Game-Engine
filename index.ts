@@ -1,3 +1,7 @@
 import { Vector3, Matrix4  } from "./src/math.ts";
+import { WebGL } from "./src/webgl.ts";
 
-console.log(Vector3.zero.add(new Vector3(1, 1, 1)));
+
+const w = new WebGL(document.querySelector('canvas'));
+
+w.useProgram(w.createProgram());

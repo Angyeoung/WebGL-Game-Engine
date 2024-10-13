@@ -29,7 +29,7 @@ export class WebGL {
 
 
 
-    clear() {
+    clear(): void {
 
         this.gl.clear(this.gl.COLOR_BUFFER_BIT);
 
@@ -37,7 +37,7 @@ export class WebGL {
 
 
     /** Updates the viewport resolution */
-    updateResolution() {
+    updateResolution(): void {
         this.gl.viewport(0, 0, this.gl.canvas.width, this.gl.canvas.height);  
     }
 
@@ -127,6 +127,7 @@ export class WebGL {
 
 
 
+    // Look into UBOs maybe
     getProgramUniforms(program: WebGLProgram): ProgramUniforms {
 
         const uniforms: ProgramUniforms = {};
@@ -157,10 +158,9 @@ export class WebGL {
         
         for (const name in uniformData) {
             
-            if (!uniformData[name]) continue;
-
+            if (!programUniforms[name]) continue;
             const location = programUniforms[name].location;
-            
+            // todo
             switch (programUniforms[name].type) {
                 
                 case UniformTypes.mat4:
@@ -184,18 +184,26 @@ export class WebGL {
 
     }
 
+
+
+    getUniformSetter() {
+
+    }
+
 }
 
 
 /** Collection of data about the uniforms in a given program */
 type ProgramUniforms = Record<UniformName, UniformInfo>;
+/** Name of a uniform within a program */
 type UniformName = string;
+/** Info about a uniform */
 type UniformInfo = {
     location: WebGLUniformLocation,
     size: number,
-    type: number,
-    data?: Float32List
+    type: number
 }
+/** Data used to update uniforms */
 type UniformData = Record<UniformName, Float32List>;
 
 enum UniformTypes {
@@ -203,6 +211,8 @@ enum UniformTypes {
     vec3 = 35665,
     vec4 = 35666
 }
+
+
 
 const defaultVert = `#version 300 es
 

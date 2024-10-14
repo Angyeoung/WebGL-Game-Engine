@@ -1,7 +1,11 @@
-import type { UniformData, ProgramUniforms } from "./webgl.d.ts";
+import type { UniformData, ProgramUniforms } from "../types.d.ts";
 import { getSetter } from "./uniforms.ts";
-import { Color } from "../utils.ts";
+import { Color } from "../utils/color.ts";
 
+const defaultVert = `#version 300 es\nvoid main() {}`;
+const defaultFrag = `#version 300 es\nprecision mediump float;void main() {}`;
+
+// todo: shader switching
 
 /** Helper functions for renderers */
 export class WebGL {
@@ -158,12 +162,12 @@ export class WebGL {
 
     setUniforms(uniformData: UniformData, programUniforms: ProgramUniforms): void {
         
-        for (const [name, data] of Object.entries(uniformData)) {
+        for (const name in uniformData) {
             if (!programUniforms[name]) continue;
             const location = programUniforms[name].location;
             const setter = getSetter(programUniforms[name].type);
-            if (!setter) continue;
-            setter(this.gl, location, data);
+            if (setter)
+                setter(this.gl, location, uniformData[name]);
         }
 
     }
@@ -176,17 +180,3 @@ export class WebGL {
 
 
 
-const defaultVert = `#version 300 es
-
-void main() {
-}
-`;
-
-const defaultFrag = `#version 300 es
-
-precision mediump float;
-
-
-void main() {
-}
-`;

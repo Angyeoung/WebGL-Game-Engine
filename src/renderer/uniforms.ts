@@ -1,4 +1,4 @@
-import type { UniformSetter } from "./webgl.d.ts";
+import type { UniformSetter } from "../types.d.ts";
 
 // https://github.com/mrdoob/three.js/blob/dev/src/renderers/webgl/WebGLUniforms.js#L559
 export function getSetter(type: number): UniformSetter | null {

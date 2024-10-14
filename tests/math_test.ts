@@ -1,5 +1,5 @@
 import { assertEquals } from "@std/assert";
-import { Vector3, Matrix4 } from "../src/math.ts";
+import { Vector3, Matrix4 } from "../src/utils/math.ts";
 
 const rand = (): number => Math.round(Math.random() * 100) - 50;
 

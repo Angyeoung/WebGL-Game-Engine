@@ -53,3 +53,16 @@ export class Random {
     }
 
 }
+
+
+
+// ! Do stuff like this instead of using multiple functions
+function add(a: Vector3, b: Vector3, dst: Vector3) {
+    dst = dst || new Vector3(0, 0, 0);
+  
+    dst.x = a.x + b.x;
+    dst.y = a.y + b.y;
+    dst.z = a.z + b.z;
+  
+    return dst;
+}

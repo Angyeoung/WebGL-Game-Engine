@@ -5,31 +5,43 @@ const emptyShader = `#version 300 es\nvoid main() {}`;
 
 // todo: shader switching
 
-/** Helper functions for renderers */
+/** Helper functions for WebGL */
 export class WebGL {
     
 
+    static getContext(canvas: HTMLCanvasElement) {
+        
+        const ctx = canvas.getContext('webgl2');
+        if (ctx)
+            return ctx;
 
-    clear(gl: WebGL2RenderingContext, color: Color | null = null): void {
+        console.error("WebGL2 Context Unavailable");
+        return new WebGL2RenderingContext();
+        
+    }
+
+
+
+    static clear(gl: WebGL2RenderingContext, color: Color | null = null): void {
 
         if (color)
             gl.clearColor(color.r, color.g, color.b, 1);
 
-        gl.clear(gl.COLOR_BUFFER_BIT);
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
     }
 
 
 
     /** Updates the viewport resolution */
-    updateResolution(gl: WebGL2RenderingContext): void {
+    static updateResolution(gl: WebGL2RenderingContext): void {
         gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);  
     }
 
     
 
     /** Creates and compiles a WebGLProgram */
-    createProgram(gl: WebGL2RenderingContext, vertSource: string = emptyShader, fragSource: string = emptyShader): WebGLProgram | null {
+    static createProgram(gl: WebGL2RenderingContext, vertSource: string = emptyShader, fragSource: string = emptyShader): WebGLProgram | null {
 
         const program = gl.createProgram();
         const fragShader = this.createShader(gl, fragSource, gl.FRAGMENT_SHADER);
@@ -61,7 +73,7 @@ export class WebGL {
 
 
 
-    createShader(gl: WebGL2RenderingContext, source: string, type: GLenum): WebGLShader | null {
+    static createShader(gl: WebGL2RenderingContext, source: string, type: GLenum): WebGLShader | null {
 
         const shader = gl.createShader(type);
         if (!shader) {
@@ -84,7 +96,7 @@ export class WebGL {
     /**
      * https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/getAttribLocation \
      * https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/vertexAttribPointer */
-    createAttribute(gl: WebGL2RenderingContext, program: WebGLProgram, name: string, size: number, type: number, normalized: boolean, stride: number, offset: number) {
+     static createAttribute(gl: WebGL2RenderingContext, program: WebGLProgram, name: string, size: number, type: number, normalized: boolean, stride: number, offset: number) {
         const loc = gl.getAttribLocation(program, name);
         gl.vertexAttribPointer(loc, size, type, normalized, stride, offset);
         gl.enableVertexAttribArray(loc);
@@ -94,7 +106,7 @@ export class WebGL {
 
 
     // Look into UBOs maybe
-    getProgramUniforms(gl: WebGL2RenderingContext, program: WebGLProgram): ProgramUniforms {
+    static getProgramUniforms(gl: WebGL2RenderingContext, program: WebGLProgram): ProgramUniforms {
 
         const uniforms: ProgramUniforms = {};
         gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS);
@@ -107,16 +119,21 @@ export class WebGL {
 
 
 
-    setUniforms(): void {
+    static setUniforms(): void {
 
     }
 
 
-    notes(gl: WebGL2RenderingContext): void {
+    static notes(gl: WebGL2RenderingContext): void {
 
-        // Program is created
-        
-        
+        // Program is created aand compiled with shaders
+        const p = WebGL.createProgram(gl, emptyShader, emptyShader);
+        if (!p) return;
+        // Get uniforms of the program
+        const u = WebGL.getProgramUniforms(gl, p);
+
+        // Figure out textures
+
     
     
     }

@@ -4,17 +4,14 @@ import { WebGL } from "./webgl.ts";
 
 export class Renderer {
 
-    webgl: WebGL;
+    canvas: HTMLCanvasElement;
 
     constructor(canvas: HTMLCanvasElement) {
-        this.webgl = new WebGL(canvas);
+        this.canvas = canvas;
     }
 
     render(scene: Scene, camera: Camera) {
-        this.webgl.clear();
         
-
-
     }
 
 

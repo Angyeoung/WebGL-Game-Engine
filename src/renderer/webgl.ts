@@ -1,71 +1,59 @@
-import type { UniformData, ProgramUniforms } from "../types.d.ts";
-import { getSetter } from "./uniforms.ts";
+import type { UniformData, ProgramUniforms, UniformSetter } from "../types.d.ts";
 import { Color } from "../utils/color.ts";
 
-const defaultVert = `#version 300 es\nvoid main() {}`;
-const defaultFrag = `#version 300 es\nprecision mediump float;void main() {}`;
+const emptyShader = `#version 300 es\nvoid main() {}`;
 
 // todo: shader switching
 
 /** Helper functions for renderers */
 export class WebGL {
     
-    canvas: HTMLCanvasElement;
-    gl: WebGL2RenderingContext;
-    
 
-    constructor(canvas: HTMLCanvasElement | null) {
 
-        const ctx = canvas?.getContext('webgl2');
+    clear(gl: WebGL2RenderingContext, color: Color | null = null): void {
 
-        if (!ctx)
-            console.error("Your browser does not support WebGL2");
-        
-        this.gl = ctx ?? new WebGL2RenderingContext();
-        this.canvas = canvas ?? new HTMLCanvasElement();
-        
-        this.clearColor = Color.aqua;
-        this.clear();
+        if (color)
+            gl.clearColor(color.r, color.g, color.b, 1);
+
+        gl.clear(gl.COLOR_BUFFER_BIT);
 
     }
 
-
-
-    set clearColor(color: Color) { this.gl.clearColor(color.r, color.g, color.b, 1); }
-
-
-
-    clear(): void {
-
-        this.gl.clear(this.gl.COLOR_BUFFER_BIT);
-
-    }
 
 
     /** Updates the viewport resolution */
-    updateResolution(): void {
-        this.gl.viewport(0, 0, this.gl.canvas.width, this.gl.canvas.height);  
+    updateResolution(gl: WebGL2RenderingContext): void {
+        gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);  
     }
 
+    
 
     /** Creates and compiles a WebGLProgram */
-    createProgram(vertSource: string = defaultVert, fragSource: string = defaultFrag): WebGLProgram | null {
+    createProgram(gl: WebGL2RenderingContext, vertSource: string = emptyShader, fragSource: string = emptyShader): WebGLProgram | null {
 
-        const program = this.gl.createProgram();
-        const fragShader = this.createShader(fragSource, 'frag');
-        const vertSharer = this.createShader(vertSource, 'vert');
+        const program = gl.createProgram();
+        const fragShader = this.createShader(gl, fragSource, gl.FRAGMENT_SHADER);
+        const vertSharer = this.createShader(gl, vertSource, gl.VERTEX_SHADER);
         if (!program || !fragShader || !vertSharer) return null;
 
-        this.gl.attachShader(program, fragShader);
-        this.gl.attachShader(program, vertSharer);
-        
-        if (!this.compileProgram(program))
-            return null;
+        gl.attachShader(program, fragShader);
+        gl.attachShader(program, vertSharer);
 
-        this.gl.enable(this.gl.DEPTH_TEST);
-        this.gl.enable(this.gl.CULL_FACE);
-        this.gl.frontFace(this.gl.CW);
-        this.gl.cullFace(this.gl.BACK);
+        gl.linkProgram(program);
+        gl.validateProgram(program);
+
+        const linkStatus = gl.getProgramParameter(program, gl.LINK_STATUS);
+        if (!linkStatus)
+            console.error('Program linking failed:\n\n', gl.getProgramInfoLog(program));
+
+        const validateStatus = gl.getProgramParameter(program, gl.VALIDATE_STATUS);
+        if (!validateStatus)
+            console.error('Program validation failed:\n\n', gl.getProgramInfoLog(program));
+
+        gl.enable(gl.DEPTH_TEST);
+        gl.enable(gl.CULL_FACE);
+        gl.frontFace(gl.CW);
+        gl.cullFace(gl.BACK);
 
         return program;
 
@@ -73,86 +61,45 @@ export class WebGL {
 
 
 
-    useProgram(program: WebGLProgram | null): void {
-        this.gl.useProgram(program);
-    }
+    createShader(gl: WebGL2RenderingContext, source: string, type: GLenum): WebGLShader | null {
 
-
-
-    compileProgram(program: WebGLProgram): boolean {
-
-        this.gl.linkProgram(program);
-        this.gl.validateProgram(program);
-
-        const linkStatus = this.gl.getProgramParameter(program, this.gl.LINK_STATUS);
-        const validateStatus = this.gl.getProgramParameter(program, this.gl.VALIDATE_STATUS);
-        if (!linkStatus) {
-            console.error('Program linking failed:\n\n', this.gl.getProgramInfoLog(program));
-            return false;
-        }
-        if (!validateStatus) {
-            console.error('Program validation failed:\n\n', this.gl.getProgramInfoLog(program));
-            return false;
-        }
-        return true;
-
-    }
-
-
-
-    createShader(source: string, type: 'frag' | 'vert'): WebGLShader | null {
-
-        const shader = this.gl.createShader(type == 'frag' ? this.gl.FRAGMENT_SHADER : this.gl.VERTEX_SHADER);
+        const shader = gl.createShader(type);
         if (!shader) {
             console.error('Shader creation failed');
             return null;
         }
         
-        this.gl.shaderSource(shader, source);
-        this.gl.compileShader(shader);
+        gl.shaderSource(shader, source);
+        gl.compileShader(shader);
 
-        if (!this.gl.getShaderParameter(shader, this.gl.COMPILE_STATUS)) {
-            console.error('Shader compilation failed:\n\n', this.gl.getShaderInfoLog(shader));
-            return null;
-        }
+        if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS))
+            console.error('Shader compilation failed:\n\n', gl.getShaderInfoLog(shader));
 
         return shader;
 
     }
 
 
+    // todo refactor, https://twgljs.org/
     /**
-     * https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/getAttribLocation
+     * https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/getAttribLocation \
      * https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/vertexAttribPointer */
-    createAttribute(program: WebGLProgram, name: string, size: number, type: number, normalized: boolean, stride: number, offset: number) {
-        const loc = this.gl.getAttribLocation(program, name);
-        this.gl.vertexAttribPointer(loc, size, type, normalized, stride, offset);
-        this.gl.enableVertexAttribArray(loc);
+    createAttribute(gl: WebGL2RenderingContext, program: WebGLProgram, name: string, size: number, type: number, normalized: boolean, stride: number, offset: number) {
+        const loc = gl.getAttribLocation(program, name);
+        gl.vertexAttribPointer(loc, size, type, normalized, stride, offset);
+        gl.enableVertexAttribArray(loc);
         return loc;
     }
 
 
 
     // Look into UBOs maybe
-    getProgramUniforms(program: WebGLProgram): ProgramUniforms {
+    getProgramUniforms(gl: WebGL2RenderingContext, program: WebGLProgram): ProgramUniforms {
 
         const uniforms: ProgramUniforms = {};
-        const numUniforms = this.gl.getProgramParameter(program, this.gl.ACTIVE_UNIFORMS);
-        
-        for (let i = 0; i < numUniforms; i++) {
-            
-            const info = this.gl.getActiveUniform(program, i);
-            if (!info) continue;
-            const location = this.gl.getUniformLocation(program, info.name);
-            if (!location) continue;
-
-            uniforms[info.name] = {
-                location,
-                size: info.size,
-                type: info.type
-            };
-
-        }
+        gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS);
+        gl.getActiveUniform(program, 0);
+        gl.getUniformLocation(program, 'info.name');
 
         return uniforms;
 
@@ -160,22 +107,114 @@ export class WebGL {
 
 
 
-    setUniforms(uniformData: UniformData, programUniforms: ProgramUniforms): void {
-        
-        for (const name in uniformData) {
-            if (!programUniforms[name]) continue;
-            const location = programUniforms[name].location;
-            const setter = getSetter(programUniforms[name].type);
-            if (setter)
-                setter(this.gl, location, uniformData[name]);
-        }
+    setUniforms(): void {
 
     }
 
 
+    notes(gl: WebGL2RenderingContext): void {
+
+        // Program is created
+        
+        
+    
+    
+    }
+
 }
 
 
+
+// https://github.com/mrdoob/three.js/blob/dev/src/renderers/webgl/WebGLUniforms.js#L559
+export function getSetter(type: number): UniformSetter | null {
+
+	switch (type) {
+
+		case 0x1406: return setValueV1f; // FLOAT
+		case 0x8b50: return setValueV2f; // _VEC2
+		case 0x8b51: return setValueV3f; // _VEC3
+		case 0x8b52: return setValueV4f; // _VEC4
+
+		case 0x8b5a: return setValueM2; // _MAT2
+		case 0x8b5b: return setValueM3; // _MAT3
+		case 0x8b5c: return setValueM4; // _MAT4
+
+		case 0x1404: // case 0x8b56: return setValueV1i; // INT, BOOL
+		case 0x8b53: // case 0x8b57: return setValueV2i; // _VEC2
+		case 0x8b54: // case 0x8b58: return setValueV3i; // _VEC3
+		case 0x8b55: // case 0x8b59: return setValueV4i; // _VEC4
+
+		case 0x1405: // return setValueV1ui; // UINT
+		case 0x8dc6: // return setValueV2ui; // _VEC2
+		case 0x8dc7: // return setValueV3ui; // _VEC3
+		case 0x8dc8: // return setValueV4ui; // _VEC4
+
+		case 0x8b5e: // SAMPLER_2D
+		case 0x8d66: // SAMPLER_EXTERNAL_OES
+		case 0x8dca: // INT_SAMPLER_2D
+		case 0x8dd2: // UNSIGNED_INT_SAMPLER_2D
+		case 0x8b62: // SAMPLER_2D_SHADOW
+		case 0x8b5f: // SAMPLER_3D
+		case 0x8dcb: // INT_SAMPLER_3D
+		case 0x8dd3: // UNSIGNED_INT_SAMPLER_3D
+		case 0x8b60: // SAMPLER_CUBE
+		case 0x8dcc: // INT_SAMPLER_CUBE
+		case 0x8dd4: // UNSIGNED_INT_SAMPLER_CUBE
+		case 0x8dc5: // SAMPLER_CUBE_SHADOW
+		case 0x8dc1: // SAMPLER_2D_ARRAY
+		case 0x8dcf: // INT_SAMPLER_2D_ARRAY
+		case 0x8dd7: // UNSIGNED_INT_SAMPLER_2D_ARRAY
+		case 0x8dc4: // SAMPLER_2D_ARRAY_SHADOW
+			break;
+
+	}
+
+    console.error("Unsupported uniform type");
+    return null;
+    
+}
+
+
+
+function setValueV1f(gl: WebGL2RenderingContext, location: WebGLUniformLocation, data: Float32List) {
+    gl.uniform1fv(location, data);
+}
+
+
+
+function setValueV2f(gl: WebGL2RenderingContext, location: WebGLUniformLocation, data: Float32List) {
+    gl.uniform2fv(location, data);
+}
+
+
+
+function setValueV3f(gl: WebGL2RenderingContext, location: WebGLUniformLocation, data: Float32List) {
+    gl.uniform3fv(location, data);
+}
+
+
+
+function setValueV4f(gl: WebGL2RenderingContext, location: WebGLUniformLocation, data: Float32List) {
+    gl.uniform4fv(location, data);
+}
+
+
+
+function setValueM2(gl: WebGL2RenderingContext, location: WebGLUniformLocation, data: Float32List) {
+    gl.uniformMatrix2fv(location, false, data);
+}
+
+
+
+function setValueM3(gl: WebGL2RenderingContext, location: WebGLUniformLocation, data: Float32List) {
+    gl.uniformMatrix2fv(location, false, data);
+}
+
+
+
+function setValueM4(gl: WebGL2RenderingContext, location: WebGLUniformLocation, data: Float32List) {
+    gl.uniformMatrix2fv(location, false, data);
+}
 
 
 

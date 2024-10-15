@@ -4,7 +4,7 @@ import { denoPlugins } from "jsr:@luca/esbuild-deno-loader@0.9";
 
 esbuild.build({
   plugins: [...denoPlugins()],
-  entryPoints: ["index.ts"],
+  entryPoints: ["src/index.ts"],
   outdir: "dist/",
   bundle: true,
   platform: "browser",

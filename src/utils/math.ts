@@ -56,18 +56,10 @@ export class Vector3 {
         dst?: Vector3,
     ): Vector3 {
         dst = dst || new Vector3(0, 0, 0);
-        const x = (vector.x * transformation[0]) +
-            (vector.y * transformation[4]) +
-            (vector.z * transformation[8]) + transformation[12];
-        const y = (vector.x * transformation[1]) +
-            (vector.y * transformation[5]) +
-            (vector.z * transformation[9]) + transformation[13];
-        const z = (vector.x * transformation[2]) +
-            (vector.y * transformation[6]) +
-            (vector.z * transformation[10]) + transformation[14];
-        const w = (vector.x * transformation[3]) +
-            (vector.y * transformation[7]) +
-            (vector.z * transformation[11]) + transformation[15];
+        const x = (vector.x * transformation[0]) + (vector.y * transformation[4]) + (vector.z * transformation[8]) + transformation[12];
+        const y = (vector.x * transformation[1]) + (vector.y * transformation[5]) + (vector.z * transformation[9]) + transformation[13];
+        const z = (vector.x * transformation[2]) + (vector.y * transformation[6]) + (vector.z * transformation[10]) + transformation[14];
+        const w = (vector.x * transformation[3]) + (vector.y * transformation[7]) + (vector.z * transformation[11]) + transformation[15];
         dst.x = x / w;
         dst.y = y / w;
         dst.z = z / w;
@@ -77,12 +69,11 @@ export class Vector3 {
     /** Cross product of two vectors, `dst` holds result if supplied */
     static cross(a: Vector3, b: Vector3, dst?: Vector3): Vector3 {
         dst = dst || new Vector3(0, 0, 0);
-
         const t1 = a.z * b.x - a.x * b.z;
         const t2 = a.x * b.y - a.y * b.x;
-        dst.x = a.y * b.z - a.z * b.y, dst.y = t1;
+        dst.x = a.y * b.z - a.z * b.y;
+        dst.y = t1;
         dst.z = t2;
-
         return dst;
     }
 
@@ -147,22 +138,10 @@ export class Matrix4 {
     /** Get a zero matrix, `m` holds result if supplied */
     static zero(dst?: Float32Array): Float32Array {
         dst = dst || new Float32Array(16);
-        dst[0] = 0;
-        dst[1] = 0;
-        dst[2] = 0;
-        dst[3] = 0;
-        dst[4] = 0;
-        dst[5] = 0;
-        dst[6] = 0;
-        dst[7] = 0;
-        dst[8] = 0;
-        dst[9] = 0;
-        dst[10] = 0;
-        dst[11] = 0;
-        dst[12] = 0;
-        dst[13] = 0;
-        dst[14] = 0;
-        dst[15] = 0;
+        dst[ 0] = 0; dst[ 1] = 0; dst[ 2] = 0; dst[ 3] = 0;
+        dst[ 4] = 0; dst[ 5] = 0; dst[ 6] = 0; dst[ 7] = 0;
+        dst[ 8] = 0; dst[ 9] = 0; dst[10] = 0; dst[11] = 0;
+        dst[12] = 0; dst[13] = 0; dst[14] = 0; dst[15] = 0;
         return dst;
     }
 
@@ -177,10 +156,8 @@ export class Matrix4 {
      */
     static identity(dst?: Float32Array): Float32Array {
         dst = dst || Matrix4.zero();
-        dst[0] = 1;
-        dst[5] = 1;
-        dst[10] = 1;
-        dst[15] = 1;
+        dst[ 0] = 1; dst[ 5] = 1;
+        dst[10] = 1; dst[15] = 1;
         return dst;
     }
 
@@ -193,7 +170,7 @@ export class Matrix4 {
      * 0 0 0 1
      * ```
      */
-    static setScaled(vector: Vector3, dst?: Float32Array): Float32Array {
+    static setScalar(vector: Vector3, dst?: Float32Array): Float32Array {
         dst = dst || new Float32Array(16);
         Matrix4.identity(dst);
         dst[0] = vector.x;
@@ -217,21 +194,15 @@ export class Matrix4 {
     ): Float32Array {
         dst = dst || Matrix4.identity();
         const zAxis = Vector3.sub(target, eye);
-        Vector3.normalize(zAxis);
+        Vector3.normalize(zAxis, zAxis);
         const xAxis = Vector3.cross(up, zAxis);
-        Vector3.normalize(xAxis);
+        Vector3.normalize(xAxis, xAxis);
         const yAxis = Vector3.cross(zAxis, xAxis);
-        Vector3.normalize(yAxis);
+        Vector3.normalize(yAxis, yAxis);
 
-        dst[0] = xAxis.x;
-        dst[1] = yAxis.x;
-        dst[2] = zAxis.x;
-        dst[4] = xAxis.y;
-        dst[5] = yAxis.y;
-        dst[6] = zAxis.y;
-        dst[8] = xAxis.z;
-        dst[9] = yAxis.z;
-        dst[10] = zAxis.z;
+        dst[0] = xAxis.x; dst[1] = yAxis.x; dst[ 2] = zAxis.x;
+        dst[4] = xAxis.y; dst[5] = yAxis.y; dst[ 6] = zAxis.y;
+        dst[8] = xAxis.z; dst[9] = yAxis.z; dst[10] = zAxis.z;
         dst[12] = -Vector3.dot(xAxis, eye);
         dst[13] = -Vector3.dot(yAxis, eye);
         dst[14] = -Vector3.dot(zAxis, eye);
@@ -249,8 +220,8 @@ export class Matrix4 {
     ): Float32Array {
         dst = dst || Matrix4.identity();
         const tan = 1.0 / (Math.tan(fov * 0.5));
-        dst[0] = tan / aspect;
-        dst[5] = tan;
+        dst[ 0] = tan / aspect;
+        dst[ 5] = tan;
         dst[10] = -far / (near - far);
         dst[11] = 1.0;
         dst[14] = (near * far) / (near - far);

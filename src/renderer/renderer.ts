@@ -1,15 +1,16 @@
 import type { Camera } from '../core/camera.ts';
 import type { Scene } from '../core/scene.ts';
-import * as twgl from '../../lib/twgl/twgl.js';
 
 export class Renderer {
     gl: WebGL2RenderingContext;
     canvas: HTMLCanvasElement;
-    // programInfo: twgl.ProgramInfo;
 
     constructor(canvas: HTMLCanvasElement) {
         this.canvas = canvas;
-        this.gl = twgl.getContext(canvas);
+        const gl = canvas.getContext('webgl2');
+        if (!gl)
+            throw "Cannot get WebGL2 context";
+        this.gl = gl;
     }
 
     render(scene: Scene, camera: Camera) {

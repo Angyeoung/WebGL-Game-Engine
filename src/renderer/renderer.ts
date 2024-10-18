@@ -1,20 +1,18 @@
-import type { Camera } from "../core/camera.ts";
-import type { Scene } from "../core/scene.ts";
-import { WebGL } from "./webgl.ts";
+import type { Camera } from '../core/camera.ts';
+import type { Scene } from '../core/scene.ts';
+import * as twgl from '../../lib/twgl/twgl.js';
 
 export class Renderer {
-
     gl: WebGL2RenderingContext;
     canvas: HTMLCanvasElement;
+    // programInfo: twgl.ProgramInfo;
 
     constructor(canvas: HTMLCanvasElement) {
         this.canvas = canvas;
-        this.gl = WebGL.getContext(canvas);
+        this.gl = twgl.getContext(canvas);
     }
 
     render(scene: Scene, camera: Camera) {
-        WebGL.clear(this.gl);
-        
         // ! Set uniforms for view and projection
 
         // this._setUniforms({
@@ -27,7 +25,7 @@ export class Renderer {
         // for (let gameObject of scene.children) {
         //     if (!gameObject.mesh) continue;
         //     if (!gameObject.mesh.isBound) this._setupVAO(gameObject.mesh);
-            
+
         //     this._setUniforms({ uWorld: gameObject.getWorldMatrix() });
 
         //     for (let geometry of gameObject.mesh.geometries) {
@@ -37,6 +35,4 @@ export class Renderer {
         //     }
         // }
     }
-
-
 }

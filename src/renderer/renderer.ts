@@ -8,8 +8,9 @@ export class Renderer {
     constructor(canvas: HTMLCanvasElement) {
         this.canvas = canvas;
         const gl = canvas.getContext('webgl2');
-        if (!gl)
-            throw "Cannot get WebGL2 context";
+        if (!gl) {
+            throw 'Cannot get WebGL2 context';
+        }
         this.gl = gl;
     }
 

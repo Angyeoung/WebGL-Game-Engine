@@ -1,21 +1,40 @@
-/** Name of a uniform within a program */
-type UniformName = string;
-/** Collection of data about the uniforms in a given program */
-type ProgramUniforms = Record<UniformName, UniformInfo>;
+export type UniformType = number;
 
-type UniformSetter = (
-    gl: WebGL2RenderingContext,
-    location: WebGLUniformLocation,
-    data: Float32List,
-) => void;
-
-/** Info about a uniform */
-type UniformInfo = {
-    location: WebGLUniformLocation;
-    size: number;
-    type: number;
+export type ProgramInfo = {
+    program: WebGLProgram;
+    uniformInfo: Record<string, UniformInfo>;
+    attributeInfo: Record<string, AttributeInfo>;
 };
-/** Data used to update uniforms */
-type UniformData = Record<UniformName, Float32List>;
 
-export { ProgramUniforms, UniformData, UniformInfo, UniformSetter };
+
+/** Setter for an attribute */
+export type AttributeSetter = (v: unknown) => void;
+
+type AttributeInfo = {
+    location: number,
+    setter: AttributeSetter
+}
+
+
+
+/** Getter for the setter of a uniform */
+type UniformSetterGetter = ((gl: WebGL2RenderingContext, location: WebGLUniformLocation) => UniformSetter);
+
+/** A setter function for a uniform */
+export type UniformSetter = (v: number[]) => void;
+
+/** Info about each uniform, mainly the location and setter */
+export type UniformInfo = {
+    location: WebGLUniformLocation,
+    setter: UniformSetter
+};
+
+export type UniformTypeInfo = {
+    type: Float32ArrayConstructor | Uint32ArrayConstructor | Int32ArrayConstructor | null,
+    setter: UniformSetterGetter;
+    size: number;
+    cols?: number;
+    rows?: number;
+    bindPoint?: GLenum;
+};
+

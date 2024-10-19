@@ -10,11 +10,9 @@
         "lib": ["deno.ns", "dom"]
     },
     "fmt": {
-        "options": {
-            "useTabs": false,
-            "indentWidth": 4,
-            "semiColons": true,
-            "singleQuote": true
-        }
+        "useTabs": false,
+        "indentWidth": 4,
+        "semiColons": true,
+        "singleQuote": true
     }
 }

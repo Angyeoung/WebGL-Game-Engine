@@ -9,30 +9,14 @@ export class Vector3 {
         this.z = z;
     }
 
-    static get zero() {
-        return new Vector3(0, 0, 0);
-    }
-    static get one() {
-        return new Vector3(1, 1, 1);
-    }
-    static get up() {
-        return new Vector3(0, 1, 0);
-    }
-    static get down() {
-        return new Vector3(0, -1, 0);
-    }
-    static get right() {
-        return new Vector3(1, 0, 0);
-    }
-    static get left() {
-        return new Vector3(-1, 0, 0);
-    }
-    static get forward() {
-        return new Vector3(0, 0, 1);
-    }
-    static get back() {
-        return new Vector3(0, 0, -1);
-    }
+    static get zero()    { return new Vector3( 0,  0,  0); }
+    static get one()     { return new Vector3( 1,  1,  1); }
+    static get up()      { return new Vector3( 0,  1,  0); }
+    static get down()    { return new Vector3( 0, -1,  0); }
+    static get right()   { return new Vector3( 1,  0,  0); }
+    static get left()    { return new Vector3(-1,  0,  0); }
+    static get forward() { return new Vector3( 0,  0,  1); }
+    static get back()    { return new Vector3( 0,  0, -1); }
 
     // ! Can be optimized with caching if necessary
     /** Gets the magnitude (length) of this vector */
@@ -50,24 +34,12 @@ export class Vector3 {
     }
 
     /** Applies a `transformation` to `vector`, `dst` holds result if supplied */
-    static transform(
-        vector: Vector3,
-        transformation: Float32Array,
-        dst?: Vector3,
-    ): Vector3 {
+    static transform(vector: Vector3, transformation: Float32Array, dst?: Vector3): Vector3 {
         dst = dst || new Vector3(0, 0, 0);
-        const x = (vector.x * transformation[0]) +
-            (vector.y * transformation[4]) + (vector.z * transformation[8]) +
-            transformation[12];
-        const y = (vector.x * transformation[1]) +
-            (vector.y * transformation[5]) + (vector.z * transformation[9]) +
-            transformation[13];
-        const z = (vector.x * transformation[2]) +
-            (vector.y * transformation[6]) + (vector.z * transformation[10]) +
-            transformation[14];
-        const w = (vector.x * transformation[3]) +
-            (vector.y * transformation[7]) + (vector.z * transformation[11]) +
-            transformation[15];
+        const x = (vector.x * transformation[0]) + (vector.y * transformation[4]) + (vector.z * transformation[ 8]) + transformation[12];
+        const y = (vector.x * transformation[1]) + (vector.y * transformation[5]) + (vector.z * transformation[ 9]) + transformation[13];
+        const z = (vector.x * transformation[2]) + (vector.y * transformation[6]) + (vector.z * transformation[10]) + transformation[14];
+        const w = (vector.x * transformation[3]) + (vector.y * transformation[7]) + (vector.z * transformation[11]) + transformation[15];
         dst.x = x / w;
         dst.y = y / w;
         dst.z = z / w;
@@ -275,22 +247,10 @@ export class Matrix4 {
         return Matrix4.multiply(
             m,
             new Float32Array([
-                1,
-                0,
-                0,
-                0,
-                0,
-                c,
-                s,
-                0,
-                0,
-                -s,
-                c,
-                0,
-                0,
-                0,
-                0,
-                1,
+                1,  0, 0, 0,
+                0,  c, s, 0,
+                0, -s, c, 0,
+                0,  0, 0, 1,
             ]),
             m,
         );
@@ -304,22 +264,10 @@ export class Matrix4 {
         return Matrix4.multiply(
             m,
             new Float32Array([
-                c,
-                0,
-                -s,
-                0,
-                0,
-                1,
-                0,
-                0,
-                s,
-                0,
-                c,
-                0,
-                0,
-                0,
-                0,
-                1,
+                c, 0, -s, 0,
+                0, 1,  0, 0,
+                s, 0,  c, 0,
+                0, 0,  0, 1,
             ]),
             m,
         );
@@ -332,23 +280,11 @@ export class Matrix4 {
         const c = Math.cos(r);
         return Matrix4.multiply(
             m,
-            new Float32Array([
-                c,
-                -s,
-                0,
-                0,
-                s,
-                c,
-                0,
-                0,
-                0,
-                0,
-                1,
-                0,
-                0,
-                0,
-                0,
-                1,
+            new Float32Array([ 
+                c, -s, 0, 0,
+                s,  c, 0, 0,
+                0,  0, 1, 0,
+                0,  0, 0, 1,
             ]),
             m,
         );

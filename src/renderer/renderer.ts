@@ -1,40 +1,45 @@
-import type { Camera } from '../core/camera.ts';
-import type { Scene } from '../core/scene.ts';
+import type { ProgramInfo } from '../types.d.ts';
+import GameObject from '../core/gameObject.ts';
+import Camera from '../core/camera.ts';
+import BWGL from './bwgl.ts';
 
 export class Renderer {
+    
     gl: WebGL2RenderingContext;
     canvas: HTMLCanvasElement;
+    programInfo: ProgramInfo;
+    vao?: WebGLVertexArrayObject;
 
     constructor(canvas: HTMLCanvasElement) {
         this.canvas = canvas;
-        const gl = canvas.getContext('webgl2');
-        if (!gl) {
-            throw 'Cannot get WebGL2 context';
-        }
-        this.gl = gl;
+        this.gl = BWGL.getContext(canvas);
+        this.programInfo = BWGL.createProgramInfo(this.gl);
     }
 
-    render(scene: Scene, camera: Camera) {
-        // ! Set uniforms for view and projection
+    render(gameObject: GameObject, camera: Camera) {
 
-        // this._setUniforms({
-        //     uView: camera.getViewMatrix(),
-        //     uProj: camera.getProjectionMatrix(),
-        //     uLightDirection: new Vector3(0, 10, 0).normalized().f32()
-        // });
+        this.gl.clearColor(0.5, 0.2, 0.8, 1);
+        this.gl.clear(this.gl.COLOR_BUFFER_BIT);
 
-        // ! Render children
-        // for (let gameObject of scene.children) {
-        //     if (!gameObject.mesh) continue;
-        //     if (!gameObject.mesh.isBound) this._setupVAO(gameObject.mesh);
+        BWGL.setUniforms(this.programInfo, {
+            u_view: camera.getViewMatrix(),
+            u_proj: camera.getProjectionMatrix(),
+            u_world: gameObject.getWorldMatrix()
+        });
 
-        //     this._setUniforms({ uWorld: gameObject.getWorldMatrix() });
+        if (!this.vao)
+            this.vao = BWGL.VAO(this.gl, this.programInfo.program, gameObject.mesh!);
+        
+        this.gl.bindVertexArray(this.vao);
+        this.gl.drawElements(this.gl.TRIANGLES, gameObject.mesh!.triangles.length, this.gl.UNSIGNED_SHORT, 0);
+        
+    }
 
-        //     for (let geometry of gameObject.mesh.geometries) {
-        //         this._setUniforms({ uDiffuse: [...geometry.material.diffuse, 1] });
-        //         this.gl.bindVertexArray(geometry.vao);
-        //         this.gl.drawElements(this.gl.TRIANGLES, geometry.triangles.length, this.gl.UNSIGNED_SHORT, 0);
-        //     }
-        // }
+    enableAutoResizing(mult: number) {
+
+        this.gl.canvas.width = globalThis.innerWidth * mult;
+        this.gl.canvas.height = globalThis.innerHeight * mult;
+        this.gl.viewport(0, 0, this.gl.canvas.width, this.gl.canvas.height);  
+
     }
 }

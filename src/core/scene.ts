@@ -1,2 +1,2 @@
-export class Scene {
+export default class Scene {
 }

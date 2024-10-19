@@ -21,7 +21,7 @@ type AttributeInfo = {
 type UniformSetterGetter = ((gl: WebGL2RenderingContext, location: WebGLUniformLocation) => UniformSetter);
 
 /** A setter function for a uniform */
-export type UniformSetter = (v: number[]) => void;
+export type UniformSetter = (v: Float32Array | Int32Array | Uint32Array) => void;
 
 /** Info about each uniform, mainly the location and setter */
 export type UniformInfo = {

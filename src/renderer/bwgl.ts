@@ -1,11 +1,12 @@
 // https://github.com/greggman/twgl.js
 
+import type Mesh from '../core/mesh.ts';
 import type { ProgramInfo, UniformTypeInfo, UniformSetter, UniformType, UniformInfo, AttributeInfo } from '../types.d.ts';
 
 /** Better WebGL */
-export class BWGL {
+export default class BWGL {
 
-    static createProgramInfo(gl: WebGL2RenderingContext, vertSource: string, fragSource: string): ProgramInfo {
+    static createProgramInfo(gl: WebGL2RenderingContext, vertSource: string = defaultVert, fragSource: string = defaultFrag): ProgramInfo {
         
         const program = createProgram(gl, vertSource, fragSource);
         const uniformInfo = createUniformInfo(gl, program);
@@ -19,20 +20,67 @@ export class BWGL {
 
     }
 
-    static setUniforms(programInfo: ProgramInfo, uniformObject: Record<string, number[]>) {
+    static setUniforms(programInfo: ProgramInfo, uniformObject: Record<string, Float32Array | Int32Array | Uint32Array>) {
 
         for (const [k, v] of Object.entries(uniformObject)) {
             if (!(k in programInfo.uniformInfo)) {
                 console.error("Invalid uniform: " + k);
                 continue;
             }
+            
             programInfo.uniformInfo[k].setter(v);
         }
 
     }
 
+    static getContext(canvas: HTMLCanvasElement) {
+        const ctx = canvas.getContext('webgl2');
+        if (!ctx)
+            throw new Error("Failed to get WebGL2 context of canvas");
+        return ctx;
+    }
+
+    static VAO(gl: WebGL2RenderingContext, program: WebGLProgram, mesh: Mesh): WebGLVertexArrayObject {
+
+        const vao = gl.createVertexArray();
+        if (!vao)
+            throw new Error("Unable to create vao");
+        
+        gl.bindVertexArray(vao);
+        
+        // Vertex buffer object and attribute
+        gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+        gl.bufferData(gl.ARRAY_BUFFER, mesh.vertices, gl.STATIC_DRAW);
+        createAttribute(gl, program, 'a_position', 3, gl.FLOAT, false, 3*4, 0);
+        
+        // Normal buffer object and attribute
+        gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+        gl.bufferData(gl.ARRAY_BUFFER, mesh.normals, gl.STATIC_DRAW);
+        createAttribute(gl, program, 'a_normal', 3, gl.FLOAT, false, 3*4, 0);
+        // Texcoord buffer object and attribute
+        if (mesh.uvs?.length) {
+            gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+            gl.bufferData(gl.ARRAY_BUFFER, mesh.uvs, gl.STATIC_DRAW);
+            createAttribute(gl, program, 'a_texCoord', 2, gl.FLOAT, true, 2*4, 0);
+        }
+        
+        // Element buffer object
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, gl.createBuffer());
+        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, mesh.triangles, gl.STATIC_DRAW);
+            
+        return vao;
+    }
+    
+
 }
 
+
+function createAttribute(gl: WebGL2RenderingContext, program: WebGLProgram, name: string,
+    size: number, type: number, normalized: boolean, stride: number, offset: number) {
+    const loc = gl.getAttribLocation(program, name);
+    gl.vertexAttribPointer(loc, size, type, normalized, stride, offset);
+    gl.enableVertexAttribArray(loc);
+}
 
 // Create and compile a new program
 function createProgram(gl: WebGL2RenderingContext, vertSource: string, fragSource: string): WebGLProgram {
@@ -53,11 +101,10 @@ function createProgram(gl: WebGL2RenderingContext, vertSource: string, fragSourc
         console.error('Program validation failed:\n\n', gl.getProgramInfoLog(program));
 
     // Settings
-    gl.enable(gl.DEPTH_TEST);
-    gl.enable(gl.CULL_FACE);
-    gl.frontFace(gl.CW);
-    gl.cullFace(gl.BACK);
-    gl.clearColor(0.75, 0.85, 0.8, 1);
+    // gl.enable(gl.DEPTH_TEST);
+    // gl.enable(gl.CULL_FACE);
+    // gl.frontFace(gl.CW);
+    // gl.cullFace(gl.BACK);
 
     gl.useProgram(program);
     return program;
@@ -95,10 +142,11 @@ function createUniformInfo(gl: WebGL2RenderingContext, program: WebGLProgram): R
     for (let i = 0; i < uCount; i++) {
         const info = gl.getActiveUniform(program, i);
         if (!info) continue;
-        
+        const loc = gl.getUniformLocation(program, info.name)!;
+
         uniforms[info.name] = {
             location: gl.getUniformLocation(program, info.name)!,
-            setter: typeMap[info.type].setter(gl, info.type)
+            setter: typeMap[info.type].setter(gl, loc)
         };
     }
     
@@ -180,87 +228,87 @@ typeMap[FLOAT_MAT4x3]                  = { type: Float32Array, size: 64, setter:
 
 
 function floatArraySetter(gl: WebGL2RenderingContext, location: WebGLUniformLocation): UniformSetter {
-    return function(v: number[]) { gl.uniform1fv(location, v); };
+    return function(v) { gl.uniform1fv(location, v as Float32Array); };
 }
 
 function floatVec2Setter(gl: WebGL2RenderingContext, location: WebGLUniformLocation): UniformSetter {
-    return function(v: number[]) { gl.uniform2fv(location, v); };
+    return function(v) { gl.uniform2fv(location, v as Float32Array); };
 }
 
 function floatVec3Setter(gl: WebGL2RenderingContext, location: WebGLUniformLocation): UniformSetter {
-    return function(v: number[]) { gl.uniform3fv(location, v); };
+    return function(v) { gl.uniform3fv(location, v as Float32Array); };
 }
 
 function floatVec4Setter(gl: WebGL2RenderingContext, location: WebGLUniformLocation): UniformSetter {
-    return function(v: number[]) { gl.uniform4fv(location, v); };
+    return function(v) { gl.uniform4fv(location, v as Float32Array); };
 }
 
 function intArraySetter(gl: WebGL2RenderingContext, location: WebGLUniformLocation): UniformSetter {
-    return function(v: number[]) { gl.uniform1iv(location, v); };
+    return function(v) { gl.uniform1iv(location, v as Int32Array); };
 }
 
 function intVec2Setter(gl: WebGL2RenderingContext, location: WebGLUniformLocation): UniformSetter {
-    return function(v: number[]) { gl.uniform2iv(location, v); };
+    return function(v) { gl.uniform2iv(location, v as Int32Array); };
 }
 
 function intVec3Setter(gl: WebGL2RenderingContext, location: WebGLUniformLocation): UniformSetter {
-    return function(v: number[]) { gl.uniform3iv(location, v); };
+    return function(v) { gl.uniform3iv(location, v as Int32Array); };
 }
 
 function intVec4Setter(gl: WebGL2RenderingContext, location: WebGLUniformLocation): UniformSetter {
-    return function(v: number[]) { gl.uniform4iv(location, v); };
+    return function(v) { gl.uniform4iv(location, v as Int32Array); };
 }
 
 function uintArraySetter(gl: WebGL2RenderingContext, location: WebGLUniformLocation): UniformSetter {
-    return function(v: number[]) { gl.uniform1uiv(location, v); };
+    return function(v) { gl.uniform1uiv(location, v as Uint32Array); };
 }
 
 function uintVec2Setter(gl: WebGL2RenderingContext, location: WebGLUniformLocation): UniformSetter {
-    return function(v: number[]) { gl.uniform2uiv(location, v); };
+    return function(v) { gl.uniform2uiv(location, v as Uint32Array); };
 }
 
 function uintVec3Setter(gl: WebGL2RenderingContext, location: WebGLUniformLocation): UniformSetter {
-    return function(v: number[]) { gl.uniform3uiv(location, v); };
+    return function(v) { gl.uniform3uiv(location, v as Uint32Array); };
 }
 
 function uintVec4Setter(gl: WebGL2RenderingContext, location: WebGLUniformLocation): UniformSetter {
-    return function(v: number[]) { gl.uniform4uiv(location, v); };
+    return function(v) { gl.uniform4uiv(location, v as Uint32Array); };
 }
 
 function floatMat2Setter(gl: WebGL2RenderingContext, location: WebGLUniformLocation): UniformSetter {
-    return function(v: number[]) { gl.uniformMatrix2fv(location, false, v); };
+    return function(v) { gl.uniformMatrix2fv(location, false, v as Float32Array); };
 }
 
 function floatMat3Setter(gl: WebGL2RenderingContext, location: WebGLUniformLocation): UniformSetter  {
-    return function(v: number[]) { gl.uniformMatrix3fv(location, false, v); };
+    return function(v) { gl.uniformMatrix3fv(location, false, v as Float32Array); };
 }
 
 function floatMat4Setter(gl: WebGL2RenderingContext, location: WebGLUniformLocation): UniformSetter  {
-    return function(v: number[]) { gl.uniformMatrix4fv(location, false, v); };
+    return function(v) { gl.uniformMatrix4fv(location, false, v as Float32Array); };
 }
 
 function floatMat23Setter(gl: WebGL2RenderingContext, location: WebGLUniformLocation): UniformSetter  {
-    return function(v: number[]) { gl.uniformMatrix2x3fv(location, false, v); };
+    return function(v) { gl.uniformMatrix2x3fv(location, false, v as Float32Array); };
 }
 
 function floatMat32Setter(gl: WebGL2RenderingContext, location: WebGLUniformLocation): UniformSetter  {
-    return function(v: number[]) { gl.uniformMatrix3x2fv(location, false, v); };
+    return function(v) { gl.uniformMatrix3x2fv(location, false, v as Float32Array); };
 }
 
 function floatMat24Setter(gl: WebGL2RenderingContext, location: WebGLUniformLocation): UniformSetter  {
-    return function(v: number[]) { gl.uniformMatrix2x4fv(location, false, v); };
+    return function(v) { gl.uniformMatrix2x4fv(location, false, v as Float32Array); };
 }
 
 function floatMat42Setter(gl: WebGL2RenderingContext, location: WebGLUniformLocation): UniformSetter  {
-    return function(v: number[]) { gl.uniformMatrix4x2fv(location, false, v); };
+    return function(v) { gl.uniformMatrix4x2fv(location, false, v as Float32Array); };
 }
 
 function floatMat34Setter(gl: WebGL2RenderingContext, location: WebGLUniformLocation): UniformSetter  {
-    return function(v: number[]) { gl.uniformMatrix3x4fv(location, false, v); };
+    return function(v) { gl.uniformMatrix3x4fv(location, false, v as Float32Array); };
 }
 
 function floatMat43Setter(gl: WebGL2RenderingContext, location: WebGLUniformLocation): UniformSetter  {
-    return function(v: number[]) { gl.uniformMatrix4x3fv(location, false, v); };
+    return function(v) { gl.uniformMatrix4x3fv(location, false, v as Float32Array); };
 }
 
 
@@ -289,3 +337,31 @@ function floatMat43Setter(gl: WebGL2RenderingContext, location: WebGLUniformLoca
 //         });
 //     }
 // }
+
+
+const defaultVert = `#version 300 es
+    in vec3 a_position;
+    in vec3 a_normal;
+
+    uniform mat4 u_world;
+    uniform mat4 u_view;
+    uniform mat4 u_proj;
+
+    out vec3 v_normal;
+
+    void main() {
+        v_normal = a_normal;
+        gl_Position = u_proj * u_view * u_world * vec4(a_position, 1.0);
+    }
+`;
+    
+const defaultFrag = `#version 300 es
+    precision mediump float;
+
+    in vec3 v_normal;
+    out vec4 out_color;
+
+    void main() {
+        out_color = vec4(1.0, 0.0, 0.0, 1.0);
+    }
+`;

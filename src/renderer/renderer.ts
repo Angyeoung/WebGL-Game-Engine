@@ -14,11 +14,11 @@ export class Renderer {
         this.canvas = canvas;
         this.gl = BWGL.getContext(canvas);
         this.programInfo = BWGL.createProgramInfo(this.gl);
+        this.gl.clearColor(0.3, 0.6, 0.8, 1);
     }
 
     render(gameObject: GameObject, camera: Camera) {
 
-        this.gl.clearColor(0.5, 0.2, 0.8, 1);
         this.gl.clear(this.gl.COLOR_BUFFER_BIT);
 
         BWGL.setUniforms(this.programInfo, {

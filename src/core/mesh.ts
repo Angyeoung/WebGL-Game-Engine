@@ -25,10 +25,15 @@ export default class Mesh {
              0.5,  0.5,  0.5, // RUF
         ]);
         const norms = new Float32Array([
-            0, 0, 0,     0, 0, 0,
-            0, 0, 0,     0, 0, 0,
-            0, 0, 0,     0, 0, 0,
-            0, 0, 0,     0, 0, 0,
+            -1, -1, -1, // LDF
+            -1,  1, -1, // LUF
+             1, -1, -1, // RDF
+             1,  1, -1, // RUF
+
+            -1, -1,  1, // LDF
+            -1,  1,  1, // LUF
+             1, -1,  1, // RDF
+             1,  1,  1, // RUF
         ]);
         const tris = new Uint16Array([
             0, 1, 3,   0, 3, 2,  // front

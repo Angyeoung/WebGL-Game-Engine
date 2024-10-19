@@ -147,7 +147,7 @@ export class Matrix4 {
      * ```
      */
     static identity(dst?: Float32Array): Float32Array {
-        dst = dst || Matrix4.zero();
+        dst = Matrix4.zero(dst);
         dst[0] = 1;
         dst[5] = 1;
         dst[10] = 1;
@@ -244,7 +244,7 @@ export class Matrix4 {
         const r = toRadians(angle);
         const s = Math.sin(r);
         const c = Math.cos(r);
-        return Matrix4.multiply(
+        Matrix4.multiply(
             m,
             new Float32Array([
                 1,  0, 0, 0,
@@ -252,8 +252,9 @@ export class Matrix4 {
                 0, -s, c, 0,
                 0,  0, 0, 1,
             ]),
-            m,
+            m
         );
+        return m;
     }
 
     /** Rotates `m` about the y-axis by `angle` degrees */

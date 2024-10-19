@@ -101,10 +101,10 @@ function createProgram(gl: WebGL2RenderingContext, vertSource: string, fragSourc
         console.error('Program validation failed:\n\n', gl.getProgramInfoLog(program));
 
     // Settings
-    // gl.enable(gl.DEPTH_TEST);
-    // gl.enable(gl.CULL_FACE);
-    // gl.frontFace(gl.CW);
-    // gl.cullFace(gl.BACK);
+    gl.enable(gl.DEPTH_TEST);
+    gl.enable(gl.CULL_FACE);
+    gl.frontFace(gl.CW);
+    gl.cullFace(gl.BACK);
 
     gl.useProgram(program);
     return program;
@@ -362,6 +362,6 @@ const defaultFrag = `#version 300 es
     out vec4 out_color;
 
     void main() {
-        out_color = vec4(1.0, 0.0, 0.0, 1.0);
+        out_color = vec4(v_normal, 1.0);
     }
 `;

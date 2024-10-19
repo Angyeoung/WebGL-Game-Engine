@@ -14,8 +14,10 @@ r.enableAutoResizing(1);
 
 function draw(time: number) {
     
-    cube.setRotation(new Vector3(0, time / 50, 0));
     
+    cube.setRotation(new Vector3(0, time / 10, 0));
+    // camera.setPosition(new Vector3(Math.sin(time/500) * 10, 1, Math.cos(time/500) * 10));
+
     r.render(cube, camera);
     requestAnimationFrame(draw)
 }

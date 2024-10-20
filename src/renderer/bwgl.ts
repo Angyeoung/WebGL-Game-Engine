@@ -364,6 +364,6 @@ const defaultFrag = `#version 300 es
 
     void main() {
         vec3 normal = normalize(v_normal);
-        f_color = vec4(normal, 1.0); 
+        f_color = vec4(normal, 1.0);
     }
 `;

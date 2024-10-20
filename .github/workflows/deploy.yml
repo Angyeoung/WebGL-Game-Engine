@@ -21,6 +21,9 @@ jobs:
       - name: Build the app
         run: deno task build # Change this if you have a specific build script
 
+      - name: Copy index.html to the dist folder
+        run: cp src/index.html dist/index.html
+
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:

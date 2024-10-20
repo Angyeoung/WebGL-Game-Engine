@@ -1,94 +1,39 @@
-name: deploy
+name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: [main]
-  pull_request:
-    branches: [main]
+    branches:
+      - main  # This triggers the action when pushing to the main branch.
 
 jobs:
-  test:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os:
-          - ubuntu-latest
-          - windows-latest
-          - macos-latest
-        deno:
-          - "2.x"
-
-
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Setup Deno
-        uses: ./
-        with:
-          deno-version: ${{ matrix.deno }}
-
-      - name: Test Deno
-        run: deno run https://deno.land/std@0.198.0/examples/welcome.ts
-
-      - name: Test `deno install -g` (2.0)
-        if: matrix.deno == 'canary' || matrix.deno == 'latest'
-        run: |
-          deno install -g --allow-net -n deno_curl https://deno.land/std@0.198.0/examples/curl.ts
-          deno_curl https://deno.land/std@0.198.0/examples/curl.ts
-
-      - name: Test `deno install (1.0)
-        if: matrix.deno == '1.x' || matrix.deno == '1.33.1' || matrix.deno == '~1.32' || matrix.deno == 'b290fd01f3f5d32f9d010fc719ced0240759c049'
-        run: |
-          deno install --allow-net -n deno_curl https://deno.land/std@0.198.0/examples/curl.ts
-          deno_curl https://deno.land/std@0.198.0/examples/curl.ts
-
-  test-version-file:
+  build:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        deno-version-file: [.dvmrc, .tool-versions]
+
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout the repository
+        uses: actions/checkout@v3
 
       - name: Setup Deno
-        uses: ./
+        uses: denoland/setup-deno@v1
         with:
-          deno-version-file: ${{ matrix.deno-version-file }}
+          deno-version: v1.x
 
-      - name: Check version
-        run: deno -V | grep -q "deno 1\.43\.1"
-
-  test-binary-name:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Setup Deno
-        uses: ./
+      - name: Cache Deno dependencies
+        uses: actions/cache@v3
         with:
-          deno-binary-name: deno_foo
+          path: ~/.cache/deno
+          key: ${{ runner.os }}-deno-${{ hashFiles('**/import_map.json') }}
+          restore-keys: |
+            ${{ runner.os }}-deno-
 
-      - name: Check binary exists
-        run: deno_foo -V
+      - name: Install Deno dependencies
+        run: deno cache main.ts
 
-  lint:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
+      - name: Build the app
+        run: deno task build # Change this if you have a specific build script
 
-      - name: Setup Deno
-        uses: ./
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
         with:
-          deno-version: "rc"
-
-      - name: Lint
-        run: deno lint
-
-      - name: Format
-        run: deno fmt --check
-
-      - name: Check types
-        run: deno check main.mjs
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist  # Assuming your build outputs to the dist folder

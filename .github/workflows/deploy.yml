@@ -25,4 +25,4 @@ jobs:
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./  # Assuming your build outputs to the dist folder
+          publish_dir: ./dist/  # Assuming your build outputs to the dist folder

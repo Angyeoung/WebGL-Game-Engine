@@ -15,6 +15,8 @@ export class Renderer {
         this.gl = BWGL.getContext(canvas);
         this.programInfo = BWGL.createProgramInfo(this.gl);
         this.gl.clearColor(0.3, 0.6, 0.8, 1);
+        this.resizeCanvas();
+        globalThis.addEventListener('resize', () => this.resizeCanvas);
     }
 
     render(gameObject: GameObject, camera: Camera) {
@@ -35,11 +37,9 @@ export class Renderer {
         
     }
 
-    enableAutoResizing(mult: number) {
-
+    resizeCanvas(mult: number = 1) {
         this.gl.canvas.width = globalThis.innerWidth * mult;
         this.gl.canvas.height = globalThis.innerHeight * mult;
-        this.gl.viewport(0, 0, this.gl.canvas.width, this.gl.canvas.height);  
-
+        this.gl.viewport(0, 0, this.gl.canvas.width, this.gl.canvas.height);
     }
 }

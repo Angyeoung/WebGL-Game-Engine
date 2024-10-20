@@ -10,8 +10,6 @@ const cube = new GameObject('coob').addMesh();
 
 camera.setPosition(new Vector3(0, 1, -5));
 
-r.enableAutoResizing(1);
-
 function draw(time: number) {
     
     

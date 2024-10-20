@@ -22,11 +22,11 @@ jobs:
         run: deno task build # Change this if you have a specific build script
 
       - name: Copy index.html to the dist folder
-        run: cp src/index.html dist/index.html
+        run: cp index.html dist/index.html
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
-          publish_dir: ./dist  # Assuming your build outputs to the dist folder
+          publish_dir: .  # Assuming your build outputs to the dist folder

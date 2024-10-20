@@ -21,8 +21,8 @@ export default class GameObject {
         this.name = name;
     }
 
-    addMesh(): GameObject {
-        this.mesh = Mesh.Cube();
+    setMesh(mesh: Mesh): GameObject {
+        this.mesh = mesh;
         return this;
     }
 

@@ -359,9 +359,13 @@ const defaultFrag = `#version 300 es
     precision mediump float;
 
     in vec3 v_normal;
-    out vec4 out_color;
+
+    out vec4 f_color;
 
     void main() {
-        out_color = vec4(v_normal, 1.0);
+        vec3 normal = normalize(v_normal);
+        float light = dot(normal, vec3(0.5, 0.7, 1.0));
+        f_color = vec4(normal, 1.0);
+        f_color.rgb *= light;
     }
 `;

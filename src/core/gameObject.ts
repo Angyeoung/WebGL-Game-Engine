@@ -22,6 +22,10 @@ export default class GameObject {
         if (rotation) this.setRotation(rotation);
     }
 
+    get forward() {
+        return Vector3.transform(Vector3.forward, Matrix4.rotate(Matrix4.identity(), this.rotation))
+    }
+
     setMesh(mesh: Mesh): this {
         this.mesh = mesh;
         return this;
@@ -33,7 +37,7 @@ export default class GameObject {
         this.needsUpdate = true;
 
         if (a instanceof Vector3) {
-            Vector3.add(this.position, a, this.position);
+            Vector3.copy(a, this.position);
             return this;
         }
 
@@ -52,14 +56,52 @@ export default class GameObject {
         this.needsUpdate = true;
 
         if (a instanceof Vector3) {
+            Vector3.copy(a, this.rotation);
+            return this;
+        }
+
+        if (typeof b === 'number' && typeof c === 'number') {
+            this.rotation.x = a % 360;
+            this.rotation.y = b % 360;
+            this.rotation.z = c % 360;
+            return this;
+        }
+        throw new Error("Invalid arguments");
+    }
+
+    rotate(v: Vector3): this;
+    rotate(x: number, y: number, z: number): this;
+    rotate(a: Vector3 | number, b?: number, c?: number): this {
+        this.needsUpdate = true;
+
+        if (a instanceof Vector3) {
             Vector3.add(this.rotation, a, this.rotation);
             return this;
         }
 
         if (typeof b === 'number' && typeof c === 'number') {
-            this.rotation.x = a;
-            this.rotation.y = b;
-            this.rotation.z = c;
+            this.rotation.x = (this.rotation.x + a) % 360;
+            this.rotation.y = (this.rotation.y + b) % 360;
+            this.rotation.z = (this.rotation.z + c) % 360;
+            return this;
+        }
+        throw new Error("Invalid arguments");
+    }
+
+    translate(v: Vector3): this;
+    translate(x: number, y: number, z: number): this;
+    translate(a: Vector3 | number, b?: number, c?: number): this {
+        this.needsUpdate = true;
+
+        if (a instanceof Vector3) {
+            Vector3.add(this.position, a, this.position);
+            return this;
+        }
+
+        if (typeof b === 'number' && typeof c === 'number') {
+            this.position.x = (this.position.x + a);
+            this.position.y = (this.position.y + b);
+            this.position.z = (this.position.z + c);
             return this;
         }
         throw new Error("Invalid arguments");
@@ -78,7 +120,7 @@ export default class GameObject {
 
     getViewMatrix(): Float32Array {
         if (this.needsUpdate) {
-            Matrix4.lookAt(this.position, Vector3.zero, undefined, this.viewMatrix);
+            Matrix4.lookAt(this.position, Vector3.add(this.position, this.forward), undefined, this.viewMatrix);
             this.needsUpdate = false;
         }
         return this.viewMatrix;

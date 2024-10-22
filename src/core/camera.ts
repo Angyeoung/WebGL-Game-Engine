@@ -1,4 +1,4 @@
-import { Matrix4 } from '../utils/math.ts';
+import { Matrix4, Vector3 } from '../utils/math.ts';
 import GameObject from './gameObject.ts';
 
 export default class Camera extends GameObject{
@@ -9,8 +9,8 @@ export default class Camera extends GameObject{
     near: number;
     far:  number;
 
-    constructor(name: string) {
-        super(name);
+    constructor(name: string, position?: Vector3, rotation?: Vector3) {
+        super(name, position, rotation);
         this.fov = 0.90;
         this.near = 0.1;
         this.far = 20000;

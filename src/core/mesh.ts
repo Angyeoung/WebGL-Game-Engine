@@ -43,7 +43,7 @@ export default class Mesh {
             6, 7, 5,   6, 5, 4,
             4, 5, 1,   4, 1, 0,
             1, 5, 7,   1, 7, 3,
-            4, 0, 3,   4, 3, 6,
+            4, 0, 2,   4, 2, 6,
         ]);
         return new Mesh(verts, norms, tris);
     }

@@ -7,21 +7,29 @@ import Scene from './core/scene.ts';
 
 
 const r = new Renderer(document.querySelector('canvas')!);
-const camera = new Camera('main');
-const coob = new GameObject('coob').setMesh(Mesh.Cube());
-const pymid = new GameObject('pymid').setMesh(Mesh.Pyramid());
-const scene = new Scene(coob, pymid);
 
-camera.setPosition(new Vector3(0, 0, -6));
-coob.setPosition(new Vector3(1, 0, 0));
-pymid.setPosition(new Vector3(-1, 0, 0));
+const camera = new Camera('main')
+    .setPosition(0, 0, -6);
+
+const cube = new GameObject('cube')
+    .setPosition(1, 0, 0)
+    .setMesh(Mesh.Cube());
+    
+const pyramid = new GameObject('pyramid', new Vector3(-1, 0, 0))
+    .setPosition(-1, 0, 0)
+    .setMesh(Mesh.Pyramid());
+
+const scene = new Scene(cube, pyramid);
+
+
 
 function draw(time: number) {
-    
-    
-    coob.setRotation(new Vector3(0, time / 10, 0));
-    pymid.setRotation(new Vector3(0, -time / 10, 0));
-    // camera.setPosition(new Vector3(Math.sin(time/500) * 10, 1, Math.cos(time/500) * 10));
+
+    cube.setRotation(0, time / 10, 0);
+    pyramid.setRotation(0, -time / 10, 0);
+
+    cube.setPosition(1, Math.sin(time / 1000), 0);
+    pyramid.setPosition(-1, Math.cos(time / 1000), 0);
 
     r.render(scene, camera);
     requestAnimationFrame(draw)

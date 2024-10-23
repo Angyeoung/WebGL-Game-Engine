@@ -69,6 +69,25 @@ export default class GameObject {
         throw new Error("Invalid arguments");
     }
 
+    setScale(v: Vector3): this;
+    setScale(x: number, y: number, z: number): this;
+    setScale(a: Vector3 | number, b?: number, c?: number): this {
+        this.needsUpdate = true;
+
+        if (a instanceof Vector3) {
+            Vector3.copy(a, this.scale);
+            return this;
+        }
+
+        if (typeof b === 'number' && typeof c === 'number') {
+            this.scale.x = a;
+            this.scale.y = b;
+            this.scale.z = c;
+            return this;
+        }
+        throw new Error("Invalid arguments");
+    }
+
     rotate(v: Vector3): this;
     rotate(x: number, y: number, z: number): this;
     rotate(a: Vector3 | number, b?: number, c?: number): this {

@@ -74,5 +74,26 @@ export default class Mesh {
         return new Mesh(verts, norms, tris);
     }
 
+    static Plane() {
+        // deno-fmt-ignore
+        const verts = new Float32Array([
+           -0.5, 0, -0.5, //BL
+           -0.5, 0,  0.5, //TL
+            0.5, 0, -0.5, //BR
+            0.5, 0,  0.5, //TR
+       ]);
+       // deno-fmt-ignore
+       const norms = new Float32Array([
+            0,  1,  0,
+            0,  1,  0,
+            0,  1,  0,
+            0,  1,  0,
+       ]);
+       // deno-fmt-ignore
+       const tris = new Uint16Array([
+           0, 1, 2,    2, 1, 3
+       ]);
+       return new Mesh(verts, norms, tris);
+    }
 
 }

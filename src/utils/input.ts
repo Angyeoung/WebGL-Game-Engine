@@ -23,9 +23,9 @@ export class Input {
                 this.movement.x = isDown ? -1 : 0; break;
             case 'd': case 'D':
                 this.movement.x = isDown ? 1 : 0; break;
-            case 'ArrowUp':
-                this.rotation.x = isDown ? 1 : 0; break;
             case 'ArrowDown':
+                this.rotation.x = isDown ? 1 : 0; break;
+            case 'ArrowUp':
                 this.rotation.x = isDown ? -1 : 0; break;
             case 'ArrowLeft':
                 this.rotation.y = isDown ? -1 : 0; break;

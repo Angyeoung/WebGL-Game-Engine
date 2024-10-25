@@ -1,3 +1,4 @@
 dist/*.js.map
 dist/*.js
 .github/
+todo.md

@@ -1,8 +1,12 @@
 # WebGL Game Engine
 
-put word
+A 3D game engine built with WebGL, Typescript and Deno.
 
-# todo
+# Build
 
-ui with uploading/deleteing/file system stuff ye possibly merge `gl.program`
-with `programUniforms` into a single structure
+1. [Install Deno](https://docs.deno.com/runtime/getting_started/installation/)
+2. Build with deno 
+   ```sh
+   deno task build
+   ```
+3. Open `dist/index.html`

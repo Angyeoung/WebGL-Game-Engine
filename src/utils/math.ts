@@ -64,7 +64,7 @@ export class Vector3 {
 
     /** Checks if this vector and `vector` are equal */
     static equals(a: Vector3, b: Vector3): boolean {
-        return a.x !== b.x || a.y !== b.y || a.z !== b.z;
+        return !(a.x !== b.x || a.y !== b.y || a.z !== b.z);
     }
 
     /** Returns the difference of two vectors, `dst` holds result if supplied */
@@ -97,7 +97,10 @@ export class Vector3 {
     /** Returns `vector` normalized, `dst` holds result if supplied */
     static normalize(vector: Vector3, dst?: Vector3): Vector3 {
         dst = dst || new Vector3(0, 0, 0);
-        const num = 1.0 / vector.magnitude;
+        const mag = vector.magnitude;
+        if (mag === 0)
+            return dst;
+        const num = 1.0 / mag;
         dst.x = vector.x * num;
         dst.y = vector.y * num;
         dst.z = vector.z * num;

@@ -351,7 +351,8 @@ const defaultVert = `#version 300 es
     out vec3 v_normal;
 
     void main() {
-        v_normal = a_normal;
+        // v_normal = a_normal;
+        v_normal = mat3(u_world) * a_normal;
         gl_Position = u_proj * u_view * u_world * vec4(a_position, 1.0);
     }
 `;
@@ -367,7 +368,9 @@ const defaultFrag = `#version 300 es
 
     void main() {
         vec3 normal = normalize(v_normal);
+        float light = dot(normal, vec3(0.5, 0.7, -1.0)) * 0.5 + 0.5;
         //f_color = vec4(normal, 1.0); 
-        f_color = u_color; 
+        f_color = u_color;
+        f_color.rgb *= light;
     }
 `;

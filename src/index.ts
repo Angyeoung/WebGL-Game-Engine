@@ -1,12 +1,12 @@
 import GameObject from './core/gameObject.ts';
 import Camera from './core/camera.ts';
 import { Vector3, Matrix4 } from './utils/math.ts';
-import { Renderer } from './renderer/renderer.ts';
+import Renderer from './renderer/renderer.ts';
 import Mesh from './core/mesh.ts';
 import Scene from './core/scene.ts';
-import { Input } from './utils/input.ts';
-import { Clock } from './core/clock.ts';
-
+import Input from './utils/input.ts';
+import Clock from './core/clock.ts';
+import Material from './core/material.ts';
 
 const r = new Renderer(document.querySelector('canvas')!);
 
@@ -14,6 +14,9 @@ const camera = new Camera('main').setPosition(0, 2, -6);
 const cube = new GameObject('cube').setMesh(Mesh.Cube());
 const pyramid = new GameObject('pyramid', new Vector3(-1, 0, 0)).setMesh(Mesh.Pyramid());
 const floor = new GameObject('floor').setMesh(Mesh.Plane()).setScale(10, 1, 10);
+cube.mesh!.material = Material.random;
+pyramid.mesh!.material = Material.random;
+floor.mesh!.material = Material.random;
 
 const scene = new Scene(cube, pyramid, floor);
 const input = new Input();
@@ -52,7 +55,9 @@ function movePlayer(t: number): void {
     const h = new Vector3(input.movement.x, 0, input.movement.z);
     Vector3.normalize(h, h);
 
-    const m = Vector3.transform(h, Matrix4.rotate(Matrix4.identity(), camera.rotation))
+    const m = Vector3.transform(h, Matrix4.rotate(Matrix4.identity(), camera.rotation));
+    m.y = 0;
+    Vector3.normalize(m, m);
     m.y = input.movement.y;
 
     camera.translate(Vector3.scale(m, t * moveSpeed));

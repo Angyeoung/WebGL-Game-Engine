@@ -1,3 +1,4 @@
+import Material from './material.ts';
 
 export default class Mesh {
 
@@ -5,6 +6,9 @@ export default class Mesh {
     normals: Float32Array;
     triangles: Uint16Array;
     uvs?: Float32Array;
+
+    material: Material = Material.default;
+    
     vao?: WebGLVertexArrayObject;
 
     constructor(vertices: Float32Array, normals: Float32Array, tris: Uint16Array) {

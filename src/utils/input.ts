@@ -1,6 +1,6 @@
 import { Vector3 } from './math.ts';
 
-export class Input {
+export default class Input {
     
     movement: Vector3;
     rotation: Vector3;

@@ -3,7 +3,7 @@ import Camera from '../core/camera.ts';
 import BWGL from './bwgl.ts';
 import type Scene from '../core/scene.ts';
 
-export class Renderer {
+export default class Renderer {
     
     gl: WebGL2RenderingContext;
     canvas: HTMLCanvasElement;
@@ -30,7 +30,10 @@ export class Renderer {
             if (!object.mesh) continue;
             if (!object.mesh.vao)
                 object.mesh.vao = BWGL.VAO(this.gl, this.programInfo.program, object.mesh);
-            BWGL.setUniforms(this.programInfo, { u_world: object.getWorldMatrix() }); 
+            BWGL.setUniforms(this.programInfo, {
+                u_world: object.getWorldMatrix(),
+                u_color: object.mesh.material.f32()
+            }); 
             this.gl.bindVertexArray(object.mesh.vao);
             this.gl.drawElements(this.gl.TRIANGLES, object.mesh.triangles.length, this.gl.UNSIGNED_SHORT, 0);
         }

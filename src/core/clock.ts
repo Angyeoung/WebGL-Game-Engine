@@ -1,6 +1,6 @@
 // https://github.com/mrdoob/three.js/blob/dev/src/extras/Controls.js
 
-export class Clock {
+export default class Clock {
 
     autoStart: boolean;
     startTime: number;

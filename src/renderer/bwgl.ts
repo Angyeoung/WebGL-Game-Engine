@@ -16,7 +16,7 @@ export default class BWGL {
             program,
             uniformInfo,
             attributeInfo
-        } as ProgramInfo;
+        }
 
     }
 
@@ -340,12 +340,13 @@ function floatMat43Setter(gl: WebGL2RenderingContext, location: WebGLUniformLoca
 
 
 const defaultVert = `#version 300 es
-    in vec3 a_position;
-    in vec3 a_normal;
 
     uniform mat4 u_world;
     uniform mat4 u_view;
     uniform mat4 u_proj;
+
+    in vec3 a_position;
+    in vec3 a_normal;
 
     out vec3 v_normal;
 
@@ -358,12 +359,15 @@ const defaultVert = `#version 300 es
 const defaultFrag = `#version 300 es
     precision mediump float;
 
+    uniform vec4 u_color;
+
     in vec3 v_normal;
 
     out vec4 f_color;
 
     void main() {
         vec3 normal = normalize(v_normal);
-        f_color = vec4(normal, 1.0); 
+        //f_color = vec4(normal, 1.0); 
+        f_color = u_color; 
     }
 `;

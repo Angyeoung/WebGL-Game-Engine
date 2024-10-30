@@ -474,7 +474,7 @@ export class Matrix4 {
 
 export class Random {
     /** Returns a value `v` where `min >= v < max` */
-    static value(min: number, max: number): number {
+    static value(min: number = 0, max: number = 1): number {
         return Math.random() * (max - min) + min;
     }
 }

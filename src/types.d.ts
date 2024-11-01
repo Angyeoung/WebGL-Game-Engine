@@ -1,3 +1,5 @@
+import EventDispatcher from './core/eventDispatcher.ts';
+
 export type UniformType = number;
 
 export type ProgramInfo = {
@@ -38,3 +40,5 @@ export type UniformTypeInfo = {
     bindPoint?: GLenum;
 };
 
+type cEvent = { type: string, target: EventDispatcher }; 
+type Listener = (this: EventDispatcher, ev: cEvent) => unknown;

@@ -1,7 +1,8 @@
 import { Matrix4, Vector3 } from '../utils/math.ts';
+import EventDispatcher from './eventDispatcher.ts';
 import Mesh from './mesh.ts';
 
-export default class GameObject {
+export default class GameObject extends EventDispatcher {
 
     private needsUpdate: boolean = true;
     
@@ -17,6 +18,7 @@ export default class GameObject {
     readonly name: string;
     
     constructor(name: string, position?: Vector3, rotation?: Vector3) {
+        super();
         this.name = name;
         if (position) this.setPosition(position);
         if (rotation) this.setRotation(rotation);
